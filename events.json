@@ -1,0 +1,56 @@
+{
+  "events": [
+    {
+      "name": "Pete v. Trump",
+      "time": "2019-07-15T20:00:00Z",
+      "address_lines": [
+        "107 S Mary Avenue",
+        "San Jose, CA 95003"
+      ],
+      "description": "This will be a great event where we watch Pete arm-wrestle Trump on live TV.  Come join us for a great party including yummy snacks.",
+      "location": {
+        "lat": 37.245786218032435,
+        "lng": -121.78339102296239
+      }
+    },
+    {
+      "name": "Debate Watch Party",
+      "time": "2019-07-25T18:30:00Z",
+      "address_lines": [
+        "107 S Mary Avenue",
+        "San Jose, CA 95003"
+      ],
+      "description": "Come watch Pete in the first democratic debate of the primary season.",
+      "location": {
+        "lat": 37.384364,
+        "lng": -121.992982
+      }
+    },
+    {
+      "name": "San Francisco Pride Pre-picnic in the park",
+      "time": "2019-08-02T12:00:00Z",
+      "address_lines": [
+        "107 S Mary Avenue",
+        "San Jose, CA 95003"
+      ],
+      "description": "Join us as we prep for SF Pride with a picnic in the park.",
+      "location": {
+        "lat": 37.766693,
+        "lng": -122.492864
+      }
+    },
+    {
+      "name": "Pete Taco Truck fundraiser",
+      "time": "2019-07-15T20:00:00Z",
+      "address_lines": [
+        "107 S Mary Avenue",
+        "San Jose, CA 95003"
+      ],
+      "description": "Bring your family to this fundraiser for Pete.  $15 admission which includes 2 tacos and a drink.",
+      "location": {
+        "lat": 37.502199,
+        "lng": -122.245490
+      }
+    }
+  ]
+}
