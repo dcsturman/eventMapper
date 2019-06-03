@@ -39,15 +39,11 @@ function mapEvents() {
         return;
     }
 
-    Popup = createPopupClass();
-
     // Now map each event.
     for (let e of eventList.events) {
         let loc = new google.maps.LatLng(e.location.lat, e.location.lng);
         let name = e.name;
         let contentString = buildContentString(name, e.description);
-        //let popup = new Popup(new google.maps.LatLng(lat, lng), e.name);
-        //popup.setMap(map);
         let infowindow = new google.maps.InfoWindow({
             content: contentString
         });
