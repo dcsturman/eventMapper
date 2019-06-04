@@ -1,18 +1,40 @@
-var map = null;
-var eventList = null;
-var markers = [];
+// The map we're displaying
+let map = null;
 
+// List of all events received from server
+// Currently that list is loaded from the events.json file.
+let eventList = null;
+
+// All the markers on the map (visible or not)
+let markers = [];
+
+// This is a boolean flag used to close bubbles
+// automatically once mouse attention is gone.
+// True is the default behavior.  False is to
+// enable CSS debugging.
+// closeControl is the toggle button in the control
+// panel associated with managing this flag.
+let autoCloseBubble = true;
+let closeControl = null;
+
+// Utility function useful for printing loc structures
+// on the console.
 function locToString(loc) {
     return "( " + loc.lat() + ", " + loc.lng() + ")";
 }
 
-function buildContentString(name, dateStr, address, description) {
-    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    const date  = new Date(dateStr);
+// Build the content for an InfoBubble.
+// name: Name of the event (string)
+// date: A Date object representing the time of the event (Date).
+// address: An array of strings representing the line by line text
+//          of the address of the event (string[])
+// description: Body of the content. (string)
+function buildContentString(name, date, address, description) {
+    const dateOptions = { year: "numeric", month: "long", day: "numeric" };
     const formattedDate = date.toLocaleDateString("en-US", dateOptions);
 
-    var addrString = '<p class="bubbleAddr">';
-    for (a of address) {
+    let addrString = '<p class="bubbleAddr">';
+    for (let a of address) {
         addrString += `${a}<br>`;
     }
     addrString += '<\p>';
@@ -25,28 +47,20 @@ function buildContentString(name, dateStr, address, description) {
         `<p>${description}</p>`+
         '</div>'+
         '</div>';
-        '</div>';
     return cs;
 }
 
 function mapEvents() {
-    // eventList should be initialized and not null at this point.
-    if (eventList == null) {
-        console.log("ERROR: eventList data not loaded!")
-        return;
-    }
-
     // Now map each event.
     for (let e of eventList.events) {
         const loc = new google.maps.LatLng(e.location.lat, e.location.lng);
-        const name = e.name;
         const date = new Date(e.time);
-        const contentString = buildContentString(name, date, e.address_lines, e.description);
-        const infowindow = new InfoBubble({
+        const contentString = buildContentString(e.name, date, e.address_lines, e.description);
+        const infoBubble = new InfoBubble({
             content: contentString,
             maxWidth: 200,
             minHeight: 10,
-            backgroundClassName: 'bubble'
+            backgroundClassName: "bubble"
         });
 
         const scaled_icon = {
@@ -64,27 +78,46 @@ function mapEvents() {
             date: date
         });
 
-        marker.addListener('mouseover', function () {
-            infowindow.open(map, marker);
+        marker.addListener("mouseover", function () {
+            infoBubble.open(map, marker);
         });
 
-        marker.addListener('mouseout', function () {
-            infowindow.close(map, marker);
+        marker.addListener("mouseout", function () {
+            if (autoCloseBubble) {
+                infoBubble.close(map, marker);
+            }
         });
 
         markers.push(marker);
     }
 }
 
+// toggleAutoClose() turns on/off auto-close of InfoBubbles
+// on mouseout events and changes the color of the control
+// accordingly.  Callback for that control listener.
+function toggleAutoClose() {
+    if (autoCloseBubble) {
+        autoCloseBubble = false;
+        closeControl.style.backgroundColor = "#ccc";
+    } else {
+        autoCloseBubble = true;
+        closeControl.style.backgroundColor = "#fff";
+    }
+}
+
+// showAllMarkers() makes all markers visible on the map.
+// Used as the callback for that control listener.
 function showAllMarkers() {
-    for (m of markers) {
+    for (let m of markers) {
         m.setVisible(true);
     }
 }
 
+// showFutureEvents() makes all markers in the past invisible.
+// Used as the call back for that control listener.
 function showFutureEvents() {
     const now = Date.now();
-    for (m of markers) {
+    for (let m of markers) {
         if (m.date > now) {
             m.setVisible(true);
         } else {
@@ -92,59 +125,74 @@ function showFutureEvents() {
         }
     }
 }
-function ShowControl(controlDiv, f, title, map) {
 
+// ShowControl adds a control to the control panel on the map.
+// controlDiv: The control to add to.
+// f: The listener callback (function).
+// title: User-visible title to display for the control (string)
+// returns The controlUI in case you need to use it later.
+function ShowControl(controlDiv, f, title) {
     // Set CSS for the control border.
-    var controlUI = document.createElement('div');
-    controlUI.style.backgroundColor = '#fff';
-    controlUI.style.display = 'block';
-    controlUI.style.border = '1px solid #000';
-    controlUI.style.cursor = 'pointer';
-    controlUI.style.textAlign = 'center';
+    let controlUI = document.createElement("div");
+    controlUI.style.backgroundColor = "#fff";
+    controlUI.style.display = "block";
+    controlUI.style.border = "1px solid #000";
+    controlUI.style.cursor = "pointer";
+    controlUI.style.textAlign = "center";
     controlUI.title = title;
     controlDiv.appendChild(controlUI);
 
     // Set CSS for the control interior.
-    var controlText = document.createElement('div');
-    controlText.style.color = 'rgb(25,25,25)';
-    controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-    controlText.style.fontSize = '16px';
-    controlText.style.lineHeight = '38px';
-    controlText.style.paddingLeft = '5px';
-    controlText.style.paddingRight = '5px';
+    let controlText = document.createElement("div");
+    controlText.style.color = "rgb(25,25,25)";
+    controlText.style.fontFamily = "Roboto,Arial,sans-serif";
+    controlText.style.fontSize = "16px";
+    controlText.style.lineHeight = "38px";
+    controlText.style.paddingLeft = "5px";
+    controlText.style.paddingRight = "5px";
     controlText.innerHTML = title;
     controlUI.appendChild(controlText);
 
     // Setup the click event listeners: simply set the map to Chicago.
-    controlUI.addEventListener('click', f);
+    controlUI.addEventListener("click", f);
 
+    return controlUI;
 }
 
-function drawControl() {
+// setupControl() sets up the control panel on the map.
+function setupControl() {
     // Create the DIV to hold the control and call the CenterControl()
     // constructor passing in this DIV.
-    var centerControlDiv = document.createElement('div');
+    let centerControlDiv = document.createElement("div");
     centerControlDiv.index = 1;
     map.controls[google.maps.ControlPosition.LEFT_CENTER].push(centerControlDiv);
 
     // Create global controls
-    new ShowControl(centerControlDiv, showAllMarkers, 'Show All', map);
-    new ShowControl(centerControlDiv, showFutureEvents, 'Upcoming Only', map);
+    ShowControl(centerControlDiv, showAllMarkers, "Show All");
+    ShowControl(centerControlDiv, showFutureEvents, "Upcoming Only");
+    closeControl = ShowControl(centerControlDiv, toggleAutoClose, "DBG: Auto-close");
 }
 
+// drawMap() is called after events are parsed from JSON, then draws
+// the markers, and draws the control panel.
 function drawMap() {
     // Very simple function for now, but we may want many different types of things on this
     // map beyond events.
     mapEvents();
-    drawControl();
+    setupControl();
 }
 
+// getEventJSON() asynchronously gets the event data in JSON format.  It then calls
+// a callback with the JSON after its received.
+// Currently the JSON is read from the eventmapper.js file.  In the future
+// we'll obtain this from a backend in production and use the file for testing purposes only.
+// callback: Function to call once the JSON is read. (function)
 function getEventJSON(callback) {
-    // For now we read this from a file.  Later we'll make reading from the file test moode
+    // For now we read this from a file.  Later we"ll make reading from the file test mode
     // and will call the server instead.
-    var xobj = new XMLHttpRequest();
+    let xobj = new XMLHttpRequest();
     xobj.overrideMimeType("application/json");
-    xobj.open('GET', 'events.json', true);
+    xobj.open("GET", "events.json", true);
     xobj.onreadystatechange = function () {
         if (xobj.readyState == 4 && xobj.status == "200") {
             // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
@@ -154,9 +202,13 @@ function getEventJSON(callback) {
     xobj.send(null);
 }
 
+// initMap() creates the map using the style elements specified in map-options.json.
+// Its the entry point to this javascript as specified in the maps api script.
+// After the map is set up, it initiates retrieval of the JSON, with callback
+// to continue with a parsed set of events by calling drawMap().
 function initMap() {
     $.getJSON("map-options.json", function (mapstyle) {
-        map = new google.maps.Map(document.getElementById('map'), {
+        map = new google.maps.Map(document.getElementById("map"), {
             zoom: 5,
             center: {lat: 37.435851, lng: -122.133246},
             zoomControl: true,
