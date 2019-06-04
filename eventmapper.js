@@ -8,13 +8,13 @@ let eventList = null;
 // All the markers on the map (visible or not)
 let markers = [];
 
-// This is a boolean flag used to close bubbles
-// automatically once mouse attention is gone.
-// True is the default behavior.  False is to
-// enable CSS debugging.
+// This is a boolean flag used to open/close bubbles
+// automatically with mouse attention.  If false,
+// then we use click behavior to toggle visibility.
+// True is the default behavior.  
 // closeControl is the toggle button in the control
 // panel associated with managing this flag.
-let autoCloseBubble = true;
+let autoBubble = true;
 let closeControl = null;
 
 // Utility function useful for printing loc structures
@@ -60,6 +60,11 @@ function mapEvents() {
             content: contentString,
             maxWidth: 200,
             minHeight: 10,
+            // This gap is necessary to avoid the bubble changing the target
+            // and causing a mouseout event (flicker of the bubble)
+            pixelOffset: new google.maps.Size(0, -15),
+            disableAnimation: true,
+            visible: false,
             backgroundClassName: "bubble"
         });
 
@@ -78,12 +83,25 @@ function mapEvents() {
             date: date
         });
 
+        marker.addListener("click", function() {
+            if (!autoBubble) {
+                if (infoBubble.visible) {
+                    infoBubble.visible = false;
+                    infoBubble.close(map, marker);
+                } else {
+                    infoBubble.visible = true;
+                    infoBubble.open(map,marker);
+                }
+            }
+        })
         marker.addListener("mouseover", function () {
-            infoBubble.open(map, marker);
+            if (autoBubble) {
+                infoBubble.open(map, marker);
+            }
         });
 
         marker.addListener("mouseout", function () {
-            if (autoCloseBubble) {
+            if (autoBubble) {
                 infoBubble.close(map, marker);
             }
         });
@@ -92,15 +110,16 @@ function mapEvents() {
     }
 }
 
-// toggleAutoClose() turns on/off auto-close of InfoBubbles
-// on mouseout events and changes the color of the control
-// accordingly.  Callback for that control listener.
-function toggleAutoClose() {
-    if (autoCloseBubble) {
-        autoCloseBubble = false;
+// toggleAutoBubble() turns on/off auto-open/close of InfoBubbles
+// on mouseover/mouseout events requiring clicks instead. Also
+// changes the color of the control accordingly.
+// This function is a callback for that control listener.
+function toggleAutoBubble() {
+    if (autoBubble) {
+        autoBubble = false;
         closeControl.style.backgroundColor = "#ccc";
     } else {
-        autoCloseBubble = true;
+        autoBubble = true;
         closeControl.style.backgroundColor = "#fff";
     }
 }
@@ -170,7 +189,7 @@ function setupControl() {
     // Create global controls
     ShowControl(centerControlDiv, showAllMarkers, "Show All");
     ShowControl(centerControlDiv, showFutureEvents, "Upcoming Only");
-    closeControl = ShowControl(centerControlDiv, toggleAutoClose, "DBG: Auto-close");
+    closeControl = ShowControl(centerControlDiv, toggleAutoBubble, "DBG: AutoBubble");
 }
 
 // drawMap() is called after events are parsed from JSON, then draws
@@ -222,10 +241,8 @@ function initMap() {
             rotateControl: false,
             styles: mapstyle,
         });
-    });
-
-    getEventJSON(function(response) {
+    }).then(getEventJSON(function(response) {
         eventList = JSON.parse(response);
         drawMap();
-    });
+    }));
 }

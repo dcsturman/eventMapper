@@ -22,3 +22,7 @@ html, body {
     /* line-height: 25px; */
     padding: 4px 4px 4px 8px;
 }
+
+.js-info-bubble-close {
+    visibility: hidden;
+}
