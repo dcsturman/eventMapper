@@ -51,6 +51,19 @@
         "lat": 37.502199,
         "lng": -122.245490
       }
+    },
+    {
+      "name": "Chapter Meeting",
+      "time": "2019-05-15T19:30:00Z",
+      "address_lines": [
+        "2108 Tammie Lane",
+        "San Jose, CA 95130"
+      ],
+      "description": "This is the third Silicon Valley for Pete Chapter meeting.  Please come and get involved!",
+      "location": {
+        "lat": 37.282883,
+        "lng": -121.992983
+      }
     }
   ]
 }
