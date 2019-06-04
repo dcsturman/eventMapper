@@ -1,5 +1,4 @@
-var map;
-var geocode;
+var map = null;
 var eventList = null;
 
 function locToString(loc) {
@@ -7,9 +6,9 @@ function locToString(loc) {
 }
 
 function buildContentString(name, description) {
-    let cs = '<div id="bubbleText">'+
+    let cs = '<div class="bubbleText">'+
         `<h1 class="bubbleHeader">${name}</h1>`+
-        '<div id="bubbleContent">'+
+        '<div class="bubbleContent">'+
         `<p>${description}</p>`+
         '</div>'+
         '</div>';
@@ -25,22 +24,35 @@ function mapEvents() {
 
     // Now map each event.
     for (let e of eventList.events) {
-        let loc = new google.maps.LatLng(e.location.lat, e.location.lng);
-        let name = e.name;
-        let contentString = buildContentString(name, e.description);
-        let infowindow = new InfoBubble({
+        const loc = new google.maps.LatLng(e.location.lat, e.location.lng);
+        const name = e.name;
+        const contentString = buildContentString(name, e.description);
+        const infowindow = new InfoBubble({
             content: contentString,
             maxWidth: 200,
             minHeight: 10,
             backgroundClassName: 'bubble'
         });
-        let marker = new google.maps.Marker({position: loc, title: name, map: map});
+
+        const scaled_icon = {
+            url: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png",
+            // size: new google.maps.Size(16, 16),
+            // scaledSize: new google.maps.Size(16, 16),
+        };
+
+        const marker = new google.maps.Marker({
+            position: loc,
+            title: name,
+            map: map,
+            icon: scaled_icon,
+            opacity: 0.5
+        });
         marker.addListener('mouseover', function () {
             infowindow.open(map, marker);
         });
 
         marker.addListener('mouseout', function () {
-            //infowindow.close(map, marker);
+            infowindow.close(map, marker);
         });
     }
 }
@@ -66,11 +78,21 @@ function getEventJSON(callback) {
 }
 
 function initMap() {
-    geocoder = new google.maps.Geocoder();
-
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: {lat: 37.435851, lng: -122.133246},
-        zoom: 12
+    $.getJSON("map-options.json", function (mapstyle) {
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 5,
+            center: {lat: 37.435851, lng: -122.133246},
+            zoomControl: true,
+            zoomControlOptions: {
+                position: google.maps.ControlPosition.RIGHT_CENTER
+            },
+            scaleControl: true,
+            mapTypeControl: false,
+            fullscreenControl: true,
+            streetViewControl: false,
+            rotateControl: false,
+            styles: mapstyle,
+        });
     });
 
     getEventJSON(function(response) {
