@@ -3,17 +3,7 @@ var geocode;
 var eventList = null;
 
 function loadClient() {
-    gapi.client.setApiKey("AIzaSyDJ_Y8HUKpZmDsyGYIt_V_NApWmg8OjUic");
-    gapi.client.load("https://content.googleapis.com/discovery/v1/apis/civicinfo/v2/rest")
-        .then(function () {
-                console.log("GAPI client loaded for API");
-            },
-            function (err) {
-                console.error("Error loading GAPI client for API", err);
-            })
-        .then(function () {
             drawMap();
-        });
 }
 
 function locToString(loc) {
@@ -44,8 +34,11 @@ function mapEvents() {
         let loc = new google.maps.LatLng(e.location.lat, e.location.lng);
         let name = e.name;
         let contentString = buildContentString(name, e.description);
-        let infowindow = new google.maps.InfoWindow({
-            content: contentString
+        let infowindow = new InfoBubble({
+            content: `<div class="bubbletext">${contentString}</div>`,
+            maxWidth: 200,
+            minHeight: 100,
+            backgroundClassName: 'bubble'
         });
         let marker = new google.maps.Marker({position: loc, title: name, map: map});
         marker.addListener('mouseover', function () {

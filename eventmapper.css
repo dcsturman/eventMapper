@@ -1,0 +1,21 @@
+/* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+#map {
+    height: 100%;
+}
+/* Optional: Makes the sample page fill the window. */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+.bubble {
+}
+.bubbletext {
+    font-family: Arial, sans-serif;
+    color: #1d253c;
+    font-size: 12px;
+    /* line-height: 25px; */
+    padding: 4px 8px 4px 8px;
+    background: url(../images/arrow.png) 95% 50% no-repeat;
+}
