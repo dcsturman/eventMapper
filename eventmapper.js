@@ -11,7 +11,7 @@ let markers = [];
 // This is a boolean flag used to open/close bubbles
 // automatically with mouse attention.  If false,
 // then we use click behavior to toggle visibility.
-// True is the default behavior.  
+// True is the default behavior.
 // closeControl is the toggle button in the control
 // panel associated with managing this flag.
 let autoBubble = true;
@@ -241,7 +241,7 @@ function initMap() {
             rotateControl: false,
             styles: mapstyle,
         });
-    }).then(getEventJSON(function(response) {
+    }).done(getEventJSON(function(response) {
         eventList = JSON.parse(response);
         drawMap();
     }));
