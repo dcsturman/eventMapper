@@ -9,13 +9,16 @@ html, body {
     margin: 0;
     padding: 0;
 }
-.bubble {
+#bubble {
 }
-.bubbletext {
+
+#bubbleHeader {
+    font-size: 16px;
+}
+#bubbleText {
     font-family: Arial, sans-serif;
     color: #1d253c;
     font-size: 12px;
     /* line-height: 25px; */
-    padding: 4px 8px 4px 8px;
-    background: url(../images/arrow.png) 95% 50% no-repeat;
+    padding: 4px 4px 4px 8px;
 }

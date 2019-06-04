@@ -2,20 +2,14 @@ var map;
 var geocode;
 var eventList = null;
 
-function loadClient() {
-            drawMap();
-}
-
 function locToString(loc) {
     return "( " + loc.lat() + ", " + loc.lng() + ")";
 }
 
 function buildContentString(name, description) {
-    let cs = '<div id="content">'+
-        '<div id="siteNotice">'+
-        '</div>'+
-        `<h1 id="firstHeading" class="firstHeading">${name}</h1>`+
-        '<div id="bodyContent">'+
+    let cs = '<div id="bubbleText">'+
+        `<h1 class="bubbleHeader">${name}</h1>`+
+        '<div id="bubbleContent">'+
         `<p>${description}</p>`+
         '</div>'+
         '</div>';
@@ -35,9 +29,9 @@ function mapEvents() {
         let name = e.name;
         let contentString = buildContentString(name, e.description);
         let infowindow = new InfoBubble({
-            content: `<div class="bubbletext">${contentString}</div>`,
+            content: contentString,
             maxWidth: 200,
-            minHeight: 100,
+            minHeight: 10,
             backgroundClassName: 'bubble'
         });
         let marker = new google.maps.Marker({position: loc, title: name, map: map});
@@ -46,7 +40,7 @@ function mapEvents() {
         });
 
         marker.addListener('mouseout', function () {
-            infowindow.close(map, marker);
+            //infowindow.close(map, marker);
         });
     }
 }
@@ -81,6 +75,6 @@ function initMap() {
 
     getEventJSON(function(response) {
         eventList = JSON.parse(response);
-        gapi.load("client", loadClient);
+        drawMap();
     });
 }
